@@ -145,16 +145,62 @@ public class RegisterFrame extends JFrame {
 
     private void registerUser() {
 
-        String name = nameField.getText();
-        String email = emailField.getText();
-        String password = new String(passwordField.getPassword());
-        String phone = phoneField.getText();
+        String name = nameField.getText().trim();
+        String email = emailField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
+        String phone = phoneField.getText().trim();
 
-        if (authService.register(name, email, password, phone)) {
-            JOptionPane.showMessageDialog(this, "Registration Successful!");
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Registration Failed.");
+        // Validate empty fields
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "All fields are required!",
+                    "Registration Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String result = authService.register(name, email, password, phone);
+
+        switch (result) {
+            case "SUCCESS":
+                JOptionPane.showMessageDialog(this,
+                        "Registration Successful!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+                break;
+
+            case "DUPLICATE_EMAIL":
+                JOptionPane.showMessageDialog(this,
+                        "This email is already registered.\nPlease use a different email.",
+                        "Email Already Exists",
+                        JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case "INVALID_PHONE":
+                JOptionPane.showMessageDialog(this,
+                        "Invalid phone number.\nPhone must contain 10-15 digits.",
+                        "Invalid Phone Number",
+                        JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case "EMPTY_FIELDS":
+                JOptionPane.showMessageDialog(this,
+                        "All fields are required!",
+                        "Registration Error",
+                        JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case "DATABASE_ERROR":
+            default:
+                JOptionPane.showMessageDialog(this,
+                        "Registration failed. Please check:\n" +
+                                "- Database connection is active\n" +
+                                "- All required fields are filled correctly\n\n" +
+                                "Check the console for detailed error information.",
+                        "Registration Error",
+                        JOptionPane.ERROR_MESSAGE);
+                break;
         }
     }
 }

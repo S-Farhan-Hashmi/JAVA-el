@@ -7,16 +7,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class UserDAO {
 
     // Register new user
-    public boolean registerUser(User user) {
+    // Returns: 1 for success, 0 for general error, -1 for duplicate email
+    public int registerUser(User user) {
 
         String query = "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getEmail());
@@ -25,11 +27,20 @@ public class UserDAO {
             stmt.setString(5, user.getRole());
 
             int rows = stmt.executeUpdate();
-            return rows > 0;
+            return rows > 0 ? 1 : 0;
 
-        } catch (SQLException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // Duplicate email error (UNIQUE constraint violation)
+            System.err.println("Duplicate email detected: " + user.getEmail());
             e.printStackTrace();
-            return false;
+            return -1;
+        } catch (SQLException e) {
+            System.err.println("Database error during registration:");
+            System.err.println("Error Code: " + e.getErrorCode());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
         }
     }
 
@@ -39,7 +50,7 @@ public class UserDAO {
         String query = "SELECT * FROM users WHERE email = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, email);
 
@@ -52,8 +63,7 @@ public class UserDAO {
                         rs.getString("email"),
                         rs.getString("password"),
                         rs.getString("phone"),
-                        rs.getString("role")
-                );
+                        rs.getString("role"));
             }
 
         } catch (SQLException e) {

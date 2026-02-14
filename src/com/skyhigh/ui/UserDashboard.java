@@ -76,8 +76,11 @@ public class UserDashboard extends JFrame {
         UIManager.put("TabbedPane.foreground", Color.WHITE);
         UIManager.put("TabbedPane.darkShadow", new Color(15, 20, 35));
         UIManager.put("TabbedPane.light", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.highlight", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.shadow", new Color(15, 20, 35));
         UIManager.put("TabbedPane.contentAreaColor", new Color(15, 20, 35));
-        UIManager.put("TabbedPane.borderHightlightColor", new Color(70, 80, 120));
+        UIManager.put("TabbedPane.borderHightlightColor", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.focus", new Color(15, 20, 35));
 
         tabbedPane.setBackground(new Color(15, 20, 35));
         tabbedPane.setForeground(new Color(180, 190, 210));
@@ -105,12 +108,12 @@ public class UserDashboard extends JFrame {
 
                 // Draw rounded rectangle
                 g2d.fillRoundRect(x, y, w, h + 5, 25, 25);
+            }
 
-                // Add subtle border for inactive tabs
-                if (!isSelected) {
-                    g2d.setColor(new Color(50, 60, 80));
-                    g2d.drawRoundRect(x, y, w - 1, h + 4, 25, 25);
-                }
+            @Override
+            protected void paintTabBorder(Graphics g, int tabPlacement, int tabIndex,
+                    int x, int y, int w, int h, boolean isSelected) {
+                // Don't paint any border - this removes the white lines
             }
 
             @Override

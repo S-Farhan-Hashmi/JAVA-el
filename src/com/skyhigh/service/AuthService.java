@@ -52,12 +52,36 @@ public class AuthService {
     // Login
     public User login(String email, String password) {
 
+        // Trim input
+        if (email != null)
+            email = email.trim();
+        if (password != null)
+            password = password.trim();
+
+        // Validate
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            System.err.println("Login failed: Empty email or password");
+            return null;
+        }
+
+        System.out.println("Attempting login for email: " + email);
+
         User user = userDAO.getUserByEmail(email);
 
         if (user != null) {
+            System.out.println("User found: " + user.getName());
+            System.out.println("Stored password: [" + user.getPassword() + "]");
+            System.out.println("Entered password: [" + password + "]");
+            System.out.println("Passwords match: " + user.getPassword().equals(password));
+
             if (user.getPassword().equals(password)) {
+                System.out.println("Login successful for: " + user.getEmail());
                 return user; // Successful login
+            } else {
+                System.err.println("Login failed: Password mismatch");
             }
+        } else {
+            System.err.println("Login failed: User not found with email: " + email);
         }
 
         return null; // Invalid credentials

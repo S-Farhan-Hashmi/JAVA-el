@@ -17,6 +17,9 @@ public class UserDashboard extends JFrame {
     private JTextField sourceField;
     private JTextField destinationField;
     private JPanel resultPanel;
+    private JComboBox<String> searchModeCombo;
+    private JPanel idPanel;
+    private JPanel routePanel;
 
     public UserDashboard(User user) {
 
@@ -84,48 +87,91 @@ public class UserDashboard extends JFrame {
 
     private JPanel createSearchPanel() {
 
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(35, 40, 60));
         panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 10, 5, 10);
+        // Top row - Search mode dropdown
+        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topRow.setBackground(new Color(35, 40, 60));
 
-        idField = new JTextField(8);
-        sourceField = new JTextField(8);
-        destinationField = new JTextField(8);
+        topRow.add(label("Search By:"));
+
+        searchModeCombo = new JComboBox<>(new String[] { "Flight ID", "Route (Source → Destination)" });
+        searchModeCombo.setPreferredSize(new Dimension(250, 30));
+        searchModeCombo.setBackground(new Color(70, 75, 100));
+        searchModeCombo.setForeground(Color.WHITE);
+        searchModeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        topRow.add(searchModeCombo);
+
+        // Bottom row - Input fields and buttons
+        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        bottomRow.setBackground(new Color(35, 40, 60));
+
+        // ID Panel (shown when Flight ID is selected)
+        idPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        idPanel.setBackground(new Color(35, 40, 60));
+        idPanel.add(label("Flight ID:"));
+        idField = new JTextField(12);
+        styleInputField(idField);
+        idPanel.add(idField);
+
+        // Route Panel (shown when Route is selected)
+        routePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        routePanel.setBackground(new Color(35, 40, 60));
+        routePanel.add(label("Source:"));
+        sourceField = new JTextField(10);
+        styleInputField(sourceField);
+        routePanel.add(sourceField);
+        routePanel.add(Box.createHorizontalStrut(10));
+        routePanel.add(label("Destination:"));
+        destinationField = new JTextField(10);
+        styleInputField(destinationField);
+        routePanel.add(destinationField);
+        routePanel.setVisible(false);
+
+        bottomRow.add(idPanel);
+        bottomRow.add(routePanel);
 
         JButton searchBtn = styledButton("Search", new Color(0, 150, 255));
         JButton showAllBtn = styledButton("Show All", new Color(100, 100, 200));
         JButton logoutBtn = styledButton("Logout", new Color(200, 50, 50));
 
-        gbc.gridx = 0;
-        panel.add(label("Flight ID:"), gbc);
-        gbc.gridx = 1;
-        panel.add(idField, gbc);
+        bottomRow.add(searchBtn);
+        bottomRow.add(showAllBtn);
+        bottomRow.add(logoutBtn);
 
-        gbc.gridx = 2;
-        panel.add(label("Source:"), gbc);
-        gbc.gridx = 3;
-        panel.add(sourceField, gbc);
+        // Combine top and bottom rows
+        JPanel combined = new JPanel();
+        combined.setLayout(new BoxLayout(combined, BoxLayout.Y_AXIS));
+        combined.setBackground(new Color(35, 40, 60));
+        combined.add(topRow);
+        combined.add(Box.createVerticalStrut(10));
+        combined.add(bottomRow);
 
-        gbc.gridx = 4;
-        panel.add(label("Destination:"), gbc);
-        gbc.gridx = 5;
-        panel.add(destinationField, gbc);
+        panel.add(combined, BorderLayout.CENTER);
 
-        gbc.gridx = 6;
-        panel.add(searchBtn, gbc);
-        gbc.gridx = 7;
-        panel.add(showAllBtn, gbc);
-        gbc.gridx = 8;
-        panel.add(logoutBtn, gbc);
+        // Event listeners
+        searchModeCombo.addActionListener(e -> {
+            boolean isFlightId = searchModeCombo.getSelectedIndex() == 0;
+            idPanel.setVisible(isFlightId);
+            routePanel.setVisible(!isFlightId);
+            panel.revalidate();
+            panel.repaint();
+        });
 
         searchBtn.addActionListener(e -> {
-            if (!idField.getText().isEmpty())
-                searchById(idField.getText());
-            else
+            if (searchModeCombo.getSelectedIndex() == 0) {
+                // Search by Flight ID
+                if (!idField.getText().trim().isEmpty()) {
+                    searchById(idField.getText().trim());
+                } else {
+                    show("Please enter a Flight ID");
+                }
+            } else {
+                // Search by Route
                 searchFlights();
+            }
         });
 
         showAllBtn.addActionListener(e -> showAllFlights());
@@ -135,6 +181,13 @@ public class UserDashboard extends JFrame {
         });
 
         return panel;
+    }
+
+    private void styleInputField(JTextField field) {
+        field.setBackground(new Color(70, 75, 100));
+        field.setForeground(Color.WHITE);
+        field.setCaretColor(Color.WHITE);
+        field.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
     }
 
     private JPanel createFlightCard(Flight f) {
@@ -188,8 +241,8 @@ public class UserDashboard extends JFrame {
         infoPanel.add(business);
 
         JButton bookBtn = styledButton("Book Now", new Color(0, 180, 120));
-        bookBtn.setPreferredSize(new Dimension(140, 50));
-        bookBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        bookBtn.setPreferredSize(new Dimension(100, 45));
+        bookBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         bookBtn.addActionListener(e -> bookFlight(f));
 

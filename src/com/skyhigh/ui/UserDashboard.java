@@ -67,11 +67,70 @@ public class UserDashboard extends JFrame {
         main.setBackground(new Color(15, 20, 35));
         main.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        // Create tabbed pane
+        // Create modern tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Customize tab appearance
+        UIManager.put("TabbedPane.selected", new Color(0, 150, 255));
+        UIManager.put("TabbedPane.background", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.foreground", Color.WHITE);
+        UIManager.put("TabbedPane.darkShadow", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.light", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.contentAreaColor", new Color(15, 20, 35));
+        UIManager.put("TabbedPane.borderHightlightColor", new Color(70, 80, 120));
+
         tabbedPane.setBackground(new Color(15, 20, 35));
-        tabbedPane.setForeground(Color.WHITE);
-        tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tabbedPane.setForeground(new Color(180, 190, 210));
+        tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        tabbedPane.setOpaque(true);
+
+        // Add custom tab styling
+        tabbedPane.setUI(new javax.swing.plaf.basic.BasicTabbedPaneUI() {
+            @Override
+            protected void paintTabBackground(Graphics g, int tabPlacement, int tabIndex,
+                    int x, int y, int w, int h, boolean isSelected) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                if (isSelected) {
+                    // Active tab - gradient with curved edges
+                    GradientPaint gradient = new GradientPaint(
+                            x, y, new Color(0, 150, 255),
+                            x, y + h, new Color(0, 120, 200));
+                    g2d.setPaint(gradient);
+                } else {
+                    // Inactive tab
+                    g2d.setColor(new Color(35, 40, 60));
+                }
+
+                // Draw rounded rectangle
+                g2d.fillRoundRect(x, y, w, h + 5, 25, 25);
+
+                // Add subtle border for inactive tabs
+                if (!isSelected) {
+                    g2d.setColor(new Color(50, 60, 80));
+                    g2d.drawRoundRect(x, y, w - 1, h + 4, 25, 25);
+                }
+            }
+
+            @Override
+            protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics,
+                    int tabIndex, String title, Rectangle textRect, boolean isSelected) {
+                g.setFont(font);
+                g.setColor(isSelected ? Color.WHITE : new Color(150, 160, 180));
+                g.drawString(title, textRect.x, textRect.y + metrics.getAscent());
+            }
+
+            @Override
+            protected int calculateTabWidth(int tabPlacement, int tabIndex, FontMetrics metrics) {
+                return super.calculateTabWidth(tabPlacement, tabIndex, metrics) + 40;
+            }
+
+            @Override
+            protected int calculateTabHeight(int tabPlacement, int tabIndex, int fontHeight) {
+                return super.calculateTabHeight(tabPlacement, tabIndex, fontHeight) + 12;
+            }
+        });
 
         // Tab 1: Search Flights
         JPanel searchTab = createSearchFlightsTab();

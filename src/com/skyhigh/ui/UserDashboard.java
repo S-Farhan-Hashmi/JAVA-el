@@ -256,10 +256,12 @@ public class UserDashboard extends JFrame {
 
         JButton searchBtn = styledButton("Search", new Color(0, 150, 255));
         JButton showAllBtn = styledButton("Show All", new Color(100, 100, 200));
+        JButton refreshBtn = styledButton("Refresh", new Color(0, 180, 120));
         JButton logoutBtn = styledButton("Logout", new Color(200, 50, 50));
 
         bottomRow.add(searchBtn);
         bottomRow.add(showAllBtn);
+        bottomRow.add(refreshBtn);
         bottomRow.add(logoutBtn);
 
         // Combine top and bottom rows
@@ -296,6 +298,11 @@ public class UserDashboard extends JFrame {
         });
 
         showAllBtn.addActionListener(e -> showAllFlights());
+        refreshBtn.addActionListener(e -> {
+            // Refresh current view
+            resultPanel.removeAll();
+            showAllFlights();
+        });
         logoutBtn.addActionListener(e -> {
             dispose();
             new LoginFrame();
@@ -423,6 +430,10 @@ public class UserDashboard extends JFrame {
         if (choice == -1)
             return;
 
+        System.out.println("User selected option index: " + choice);
+        String selectedClass = choice == 0 ? "Economy" : "Business";
+        System.out.println("Selected class: " + selectedClass);
+
         String card = JOptionPane.showInputDialog(this, "Enter 8-digit Card Number:");
 
         if (card == null || !card.matches("\\d{8}")) {
@@ -433,14 +444,17 @@ public class UserDashboard extends JFrame {
         Booking booking = new Booking(
                 loggedInUser.getId(),
                 f.getFlightId(),
-                choice == 0 ? "Economy" : "Business");
+                selectedClass);
+
+        System.out.println("Creating booking - User: " + loggedInUser.getId() + ", Flight: " + f.getFlightId()
+                + ", Class: " + booking.getClassType());
 
         BookingDAO dao = new BookingDAO();
 
         try {
             if (dao.bookFlight(booking)) {
                 show("Booking Successful!");
-                showAllFlights(); // 🔥 REFRESH AFTER BOOKING
+                showAllFlights(); // Refresh after booking
             } else {
                 show("Booking Failed.");
             }

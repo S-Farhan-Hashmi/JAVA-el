@@ -12,6 +12,11 @@ public class BookingDAO {
 
     public boolean bookFlight(Booking booking) throws SeatUnavailableException {
 
+        System.out.println("======= BOOKING FLIGHT =======");
+        System.out.println("Flight ID: " + booking.getFlightId());
+        System.out.println("Class Type: " + booking.getClassType());
+        System.out.println("User ID: " + booking.getUserId());
+
         String selectQuery = """
                 SELECT economy_seats, business_seats,
                        economy_price, business_price
@@ -45,6 +50,7 @@ public class BookingDAO {
             ResultSet rs = selectStmt.executeQuery();
 
             if (!rs.next()) {
+                System.err.println("Flight not found!");
                 conn.rollback();
                 return false;
             }
@@ -52,27 +58,37 @@ public class BookingDAO {
             int ecoSeats = rs.getInt("economy_seats");
             int busSeats = rs.getInt("business_seats");
 
+            System.out.println("Current Economy Seats: " + ecoSeats);
+            System.out.println("Current Business Seats: " + busSeats);
+
             boolean isEconomy = booking.getClassType().equalsIgnoreCase("Economy");
+            System.out.println("Is Economy? " + isEconomy);
 
             if (isEconomy) {
                 if (ecoSeats <= 0) {
+                    System.err.println("No Economy seats available!");
                     conn.rollback();
                     throw new SeatUnavailableException("No Economy seats available.");
                 }
 
+                System.out.println("Reducing Economy seats by 1...");
                 PreparedStatement updateStmt = conn.prepareStatement(updateEconomy);
                 updateStmt.setString(1, booking.getFlightId());
-                updateStmt.executeUpdate();
+                int updated = updateStmt.executeUpdate();
+                System.out.println("Economy seats updated: " + updated + " row(s)");
 
             } else {
                 if (busSeats <= 0) {
+                    System.err.println("No Business seats available!");
                     conn.rollback();
                     throw new SeatUnavailableException("No Business seats available.");
                 }
 
+                System.out.println("Reducing Business seats by 1...");
                 PreparedStatement updateStmt = conn.prepareStatement(updateBusiness);
                 updateStmt.setString(1, booking.getFlightId());
-                updateStmt.executeUpdate();
+                int updated = updateStmt.executeUpdate();
+                System.out.println("Business seats updated: " + updated + " row(s)");
             }
 
             PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
@@ -80,11 +96,15 @@ public class BookingDAO {
             insertStmt.setString(2, booking.getFlightId());
             insertStmt.setString(3, booking.getClassType());
             insertStmt.executeUpdate();
+            System.out.println("Booking record inserted");
 
             conn.commit();
+            System.out.println("Transaction committed successfully!");
+            System.out.println("======= BOOKING COMPLETE =======");
             return true;
 
         } catch (SQLException e) {
+            System.err.println("SQL Error during booking:");
             e.printStackTrace();
             return false;
         }
@@ -115,42 +135,73 @@ public class BookingDAO {
                 WHERE flight_id = ?
                 """;
 
-        try (Connection conn = DBConnection.getConnection()) {
-
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
+
+            System.out.println("Canceling booking ID: " + bookingId);
 
             PreparedStatement getStmt = conn.prepareStatement(getQuery);
             getStmt.setInt(1, bookingId);
             ResultSet rs = getStmt.executeQuery();
 
             if (!rs.next()) {
+                System.err.println("Booking not found: " + bookingId);
                 conn.rollback();
                 return false;
             }
 
             String flightId = rs.getString("flight_id");
             String classType = rs.getString("class_type");
+            System.out.println("Found booking - Flight: " + flightId + ", Class: " + classType);
 
             PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
             deleteStmt.setInt(1, bookingId);
-            deleteStmt.executeUpdate();
+            int deletedRows = deleteStmt.executeUpdate();
+            System.out.println("Deleted booking rows: " + deletedRows);
 
+            PreparedStatement restoreStmt;
             if (classType.equalsIgnoreCase("Economy")) {
-                PreparedStatement restoreStmt = conn.prepareStatement(restoreEconomy);
+                restoreStmt = conn.prepareStatement(restoreEconomy);
                 restoreStmt.setString(1, flightId);
-                restoreStmt.executeUpdate();
+                int updatedRows = restoreStmt.executeUpdate();
+                System.out.println("Restored " + updatedRows + " Economy seat(s) to flight " + flightId);
             } else {
-                PreparedStatement restoreStmt = conn.prepareStatement(restoreBusiness);
+                restoreStmt = conn.prepareStatement(restoreBusiness);
                 restoreStmt.setString(1, flightId);
-                restoreStmt.executeUpdate();
+                int updatedRows = restoreStmt.executeUpdate();
+                System.out.println("Restored " + updatedRows + " Business seat(s) to flight " + flightId);
             }
 
             conn.commit();
+            System.out.println("Booking cancelled successfully!");
             return true;
 
         } catch (SQLException e) {
+            System.err.println("Error canceling booking:");
+            System.err.println("Error Code: " + e.getErrorCode());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Message: " + e.getMessage());
             e.printStackTrace();
+
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    System.err.println("Transaction rolled back");
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
+            }
             return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -170,13 +221,13 @@ public class BookingDAO {
                 """;
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                bookings.add(new String[]{
+                bookings.add(new String[] {
                         rs.getString("booking_id"),
                         rs.getString("flight_id"),
                         rs.getString("source"),

@@ -19,7 +19,7 @@ public class AdminDashboard extends JFrame {
         flightDAO = new FlightDAO();
 
         setTitle("SkyHigh Airlines - Admin Portal");
-        setSize(1200, 700);
+        setSize(1250, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -71,7 +71,8 @@ public class AdminDashboard extends JFrame {
         model = new DefaultTableModel(
                 new String[]{"ID","Source","Destination",
                         "Departure","Arrival",
-                        "Economy ₹","Seats"},0);
+                        "Eco ₹","Eco Seats",
+                        "Bus ₹","Bus Seats"},0);
 
         table = new JTable(model);
         table.setRowHeight(32);
@@ -142,8 +143,10 @@ public class AdminDashboard extends JFrame {
                     f.getDestination(),
                     f.getDepartureTime(),
                     f.getArrivalTime(),
-                    f.getPrice(),
-                    f.getSeatsAvailable()
+                    f.getEconomyPrice(),
+                    f.getEconomySeats(),
+                    f.getBusinessPrice(),
+                    f.getBusinessSeats()
             });
         }
     }
@@ -163,7 +166,9 @@ public class AdminDashboard extends JFrame {
                 new JComboBox<>(new String[]{"AM","PM"});
 
         JTextField ecoPrice = new JTextField();
-        JTextField seats = new JTextField();
+        JTextField busPrice = new JTextField();
+        JTextField ecoSeats = new JTextField();
+        JTextField busSeats = new JTextField();
 
         JPanel panel = new JPanel(new GridLayout(0,3,15,15));
         panel.setBackground(new Color(30,35,55));
@@ -172,16 +177,14 @@ public class AdminDashboard extends JFrame {
         panel.add(label("Source:")); panel.add(src); panel.add(new JLabel());
         panel.add(label("Destination:")); panel.add(dest); panel.add(new JLabel());
 
-        panel.add(label("Departure:"));
-        panel.add(depTime);
-        panel.add(depAMPM);
-
-        panel.add(label("Arrival:"));
-        panel.add(arrTime);
-        panel.add(arrAMPM);
+        panel.add(label("Departure:")); panel.add(depTime); panel.add(depAMPM);
+        panel.add(label("Arrival:")); panel.add(arrTime); panel.add(arrAMPM);
 
         panel.add(label("Economy Price:")); panel.add(ecoPrice); panel.add(new JLabel());
-        panel.add(label("Seats:")); panel.add(seats); panel.add(new JLabel());
+        panel.add(label("Business Price:")); panel.add(busPrice); panel.add(new JLabel());
+
+        panel.add(label("Economy Seats:")); panel.add(ecoSeats); panel.add(new JLabel());
+        panel.add(label("Business Seats:")); panel.add(busSeats); panel.add(new JLabel());
 
         int result = JOptionPane.showConfirmDialog(this,panel,
                 "Add Flight",JOptionPane.OK_CANCEL_OPTION);
@@ -200,7 +203,9 @@ public class AdminDashboard extends JFrame {
                         departure,
                         arrival,
                         Double.parseDouble(ecoPrice.getText()),
-                        Integer.parseInt(seats.getText())
+                        Double.parseDouble(busPrice.getText()),
+                        Integer.parseInt(ecoSeats.getText()),
+                        Integer.parseInt(busSeats.getText())
                 );
 
                 if(flightDAO.addFlight(flight)){

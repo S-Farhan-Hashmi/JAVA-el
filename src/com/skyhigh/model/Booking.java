@@ -1,13 +1,15 @@
 package com.skyhigh.model;
 
-public abstract class Booking {
+public class Booking {
 
-    protected int userId;
-    protected String flightId;
+    private int userId;
+    private String flightId;
+    private String classType;
 
-    public Booking(int userId, String flightId) {
+    public Booking(int userId, String flightId, String classType) {
         this.userId = userId;
         this.flightId = flightId;
+        this.classType = classType;
     }
 
     public int getUserId() {
@@ -18,5 +20,7 @@ public abstract class Booking {
         return flightId;
     }
 
-    public abstract double calculateFinalPrice(double basePrice);
+    public String getClassType() {
+        return classType;
+    }
 }

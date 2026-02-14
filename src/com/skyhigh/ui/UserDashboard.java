@@ -2,7 +2,6 @@ package com.skyhigh.ui;
 
 import com.skyhigh.dao.BookingDAO;
 import com.skyhigh.dao.FlightDAO;
-import com.skyhigh.exception.SeatUnavailableException;
 import com.skyhigh.model.*;
 
 import javax.swing.*;
@@ -25,30 +24,31 @@ public class UserDashboard extends JFrame {
         this.flightDAO = new FlightDAO();
 
         setTitle("SkyHigh Airlines - User Dashboard");
-        setSize(1150, 650);
+        setSize(1200, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        getContentPane().setBackground(new Color(20, 25, 40));
+        getContentPane().setBackground(new Color(15, 20, 35));
 
         add(createHeader(), BorderLayout.NORTH);
-        add(createCenterPanel(), BorderLayout.CENTER);
+        add(createMainPanel(), BorderLayout.CENTER);
 
         setVisible(true);
     }
 
     private JPanel createHeader() {
+
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(15, 20, 35));
-        header.setPreferredSize(new Dimension(1000, 70));
+        header.setBackground(new Color(10, 15, 28));
+        header.setPreferredSize(new Dimension(1000, 75));
 
         JLabel title = new JLabel("  SkyHigh Airlines");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
 
         JLabel welcome = new JLabel("Welcome, " + loggedInUser.getName() + "  ");
-        welcome.setForeground(new Color(180, 200, 255));
+        welcome.setForeground(new Color(150, 200, 255));
         welcome.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcome.setHorizontalAlignment(SwingConstants.RIGHT);
 
@@ -58,202 +58,96 @@ public class UserDashboard extends JFrame {
         return header;
     }
 
-    private JPanel createCenterPanel() {
+    private JPanel createMainPanel() {
 
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(20, 25, 40));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        JPanel main = new JPanel(new BorderLayout());
+        main.setBackground(new Color(15, 20, 35));
+        main.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        JPanel searchPanel = new JPanel(new BorderLayout());
-        searchPanel.setBackground(new Color(45, 50, 70));
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
-        leftPanel.setBackground(new Color(45, 50, 70));
-
-        JLabel idLabel = new JLabel("Flight ID:");
-        idLabel.setForeground(Color.WHITE);
-        idField = new JTextField(8);
-
-        JLabel srcLabel = new JLabel("Source:");
-        srcLabel.setForeground(Color.WHITE);
-        sourceField = new JTextField(8);
-
-        JLabel destLabel = new JLabel("Destination:");
-        destLabel.setForeground(Color.WHITE);
-        destinationField = new JTextField(8);
-
-        JButton searchBtn = new JButton("Search");
-        stylePrimaryButton(searchBtn);
-
-        JButton showAllBtn = new JButton("Show All Flights");
-        styleSecondaryButton(showAllBtn);
-
-        JButton myBookingsBtn = new JButton("My Bookings");
-        styleSecondaryButton(myBookingsBtn);
-
-        leftPanel.add(idLabel);
-        leftPanel.add(idField);
-        leftPanel.add(srcLabel);
-        leftPanel.add(sourceField);
-        leftPanel.add(destLabel);
-        leftPanel.add(destinationField);
-        leftPanel.add(searchBtn);
-        leftPanel.add(showAllBtn);
-        leftPanel.add(myBookingsBtn);
-
-        JButton logoutBtn = new JButton("Logout");
-        styleDangerButton(logoutBtn);
-
-        searchPanel.add(leftPanel, BorderLayout.WEST);
-        searchPanel.add(logoutBtn, BorderLayout.EAST);
-
-        mainPanel.add(searchPanel, BorderLayout.NORTH);
+        main.add(createSearchPanel(), BorderLayout.NORTH);
 
         resultPanel = new JPanel();
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
-        resultPanel.setBackground(new Color(20, 25, 40));
+        resultPanel.setBackground(new Color(15, 20, 35));
 
-        JScrollPane scrollPane = new JScrollPane(resultPanel);
-        scrollPane.setBorder(null);
+        JScrollPane scroll = new JScrollPane(resultPanel);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(new Color(15, 20, 35));
 
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        main.add(scroll, BorderLayout.CENTER);
+
+        return main;
+    }
+
+    private JPanel createSearchPanel() {
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(35, 40, 60));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 5, 10);
+
+        idField = new JTextField(8);
+        sourceField = new JTextField(8);
+        destinationField = new JTextField(8);
+
+        JButton searchBtn = styledButton("Search", new Color(0,150,255));
+        JButton showAllBtn = styledButton("Show All", new Color(100,100,200));
+        JButton logoutBtn = styledButton("Logout", new Color(200,50,50));
+
+        gbc.gridx=0; panel.add(label("Flight ID:"), gbc);
+        gbc.gridx=1; panel.add(idField, gbc);
+
+        gbc.gridx=2; panel.add(label("Source:"), gbc);
+        gbc.gridx=3; panel.add(sourceField, gbc);
+
+        gbc.gridx=4; panel.add(label("Destination:"), gbc);
+        gbc.gridx=5; panel.add(destinationField, gbc);
+
+        gbc.gridx=6; panel.add(searchBtn, gbc);
+        gbc.gridx=7; panel.add(showAllBtn, gbc);
+        gbc.gridx=8; panel.add(logoutBtn, gbc);
 
         searchBtn.addActionListener(e -> {
-            if (!idField.getText().isEmpty()) {
+            if(!idField.getText().isEmpty())
                 searchById(idField.getText());
-            } else if (!sourceField.getText().isEmpty() &&
-                    !destinationField.getText().isEmpty()) {
+            else
                 searchFlights();
-            }
         });
 
         showAllBtn.addActionListener(e -> showAllFlights());
-        myBookingsBtn.addActionListener(e -> showMyBookings());
         logoutBtn.addActionListener(e -> {
             dispose();
             new LoginFrame();
         });
 
-        return mainPanel;
+        return panel;
     }
 
-    private void stylePrimaryButton(JButton button) {
-        button.setBackground(new Color(0, 150, 255));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(true);
-        button.setOpaque(true);
-    }
-
-    private void styleSecondaryButton(JButton button) {
-        button.setBackground(new Color(100, 100, 200));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(true);
-        button.setOpaque(true);
-    }
-
-    private void styleDangerButton(JButton button) {
-        button.setBackground(new Color(200, 50, 50));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(true);
-        button.setOpaque(true);
-    }
-
-    private void showStyledMessage(String message) {
-        UIManager.put("Panel.background", new Color(30, 35, 55));
-        UIManager.put("OptionPane.background", new Color(30, 35, 55));
-        UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        JOptionPane.showMessageDialog(this, message);
-    }
-
-    private void showStyledDialog(Component component, String title) {
-        UIManager.put("Panel.background", new Color(30, 35, 55));
-        UIManager.put("OptionPane.background", new Color(30, 35, 55));
-        UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        JOptionPane.showMessageDialog(this, component, title, JOptionPane.PLAIN_MESSAGE);
-    }
-
-    private void searchFlights() {
-
-        resultPanel.removeAll();
-        List<Flight> flights =
-                flightDAO.searchFlights(sourceField.getText(), destinationField.getText());
-
-        if (flights.isEmpty()) {
-            showStyledMessage("No flights found.");
-        } else {
-            for (Flight f : flights) {
-                resultPanel.add(createFlightCard(f));
-                resultPanel.add(Box.createVerticalStrut(15));
-            }
-        }
-
-        resultPanel.revalidate();
-        resultPanel.repaint();
-    }
-
-    private void searchById(String flightId) {
-
-        resultPanel.removeAll();
-        Flight flight = flightDAO.getFlightById(flightId);
-
-        if (flight == null) {
-            showStyledMessage("No flight found with ID: " + flightId);
-        } else {
-            resultPanel.add(createFlightCard(flight));
-        }
-
-        resultPanel.revalidate();
-        resultPanel.repaint();
-    }
-
-    private void showAllFlights() {
-
-        resultPanel.removeAll();
-        List<Flight> flights = flightDAO.getAllFlights();
-
-        for (Flight f : flights) {
-            resultPanel.add(createFlightCard(f));
-            resultPanel.add(Box.createVerticalStrut(15));
-        }
-
-        resultPanel.revalidate();
-        resultPanel.repaint();
-    }
-
-    private JPanel createFlightCard(Flight flight) {
+    private JPanel createFlightCard(Flight f) {
 
         JPanel card = new JPanel(new BorderLayout());
-        card.setBackground(new Color(50, 60, 90));
+        card.setBackground(new Color(45, 55, 90));
         card.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
         JLabel info = new JLabel(
-                "<html><div style='color:white;'>" +
-                        "<b>" + flight.getFlightId() + "</b><br>" +
-                        flight.getSource() + " → " + flight.getDestination() +
-                        "<br>Departure: " + flight.getDepartureTime() +
-                        " | Arrival: " + flight.getArrivalTime() +
-                        "<br>Price: ₹" + flight.getPrice() +
-                        " | Seats: " + flight.getSeatsAvailable() +
+                "<html><div style='color:white'>" +
+                        "<b>" + f.getFlightId() + "</b><br>" +
+                        f.getSource() + " → " + f.getDestination() + "<br>" +
+                        "Departure: " + f.getDepartureTime() +
+                        " | Arrival: " + f.getArrivalTime() + "<br><br>" +
+                        "Economy: ₹" + f.getEconomyPrice() +
+                        " (" + f.getEconomySeats() + " seats)<br>" +
+                        "Business: ₹" + f.getBusinessPrice() +
+                        " (" + f.getBusinessSeats() + " seats)" +
                         "</div></html>"
         );
 
-        JButton bookBtn = new JButton("Book Now");
-        bookBtn.setBackground(new Color(0, 180, 120));
-        bookBtn.setForeground(Color.WHITE);
-        bookBtn.setFocusPainted(false);
-        bookBtn.setBorderPainted(false);
-        bookBtn.setContentAreaFilled(true);
-        bookBtn.setOpaque(true);
+        JButton bookBtn = styledButton("Book Now", new Color(0,180,120));
 
-        bookBtn.addActionListener(e -> bookFlight(flight));
+        bookBtn.addActionListener(e -> bookFlight(f));
 
         card.add(info, BorderLayout.CENTER);
         card.add(bookBtn, BorderLayout.EAST);
@@ -261,13 +155,49 @@ public class UserDashboard extends JFrame {
         return card;
     }
 
-    private void bookFlight(Flight flight) {
+    private void searchFlights() {
+        resultPanel.removeAll();
+        List<Flight> flights =
+                flightDAO.searchFlights(sourceField.getText(), destinationField.getText());
+        displayFlights(flights);
+    }
 
-        String[] options = {"Economy", "Business"};
+    private void searchById(String id) {
+        resultPanel.removeAll();
+        Flight f = flightDAO.getFlightById(id);
+        if(f!=null)
+            resultPanel.add(createFlightCard(f));
+        else
+            show("No flight found.");
+        resultPanel.revalidate();
+        resultPanel.repaint();
+    }
+
+    private void showAllFlights() {
+        resultPanel.removeAll();
+        displayFlights(flightDAO.getAllFlights());
+    }
+
+    private void displayFlights(List<Flight> flights){
+        if(flights.isEmpty()){
+            show("No flights found.");
+        }else{
+            for(Flight f : flights){
+                resultPanel.add(createFlightCard(f));
+                resultPanel.add(Box.createVerticalStrut(15));
+            }
+        }
+        resultPanel.revalidate();
+        resultPanel.repaint();
+    }
+
+    private void bookFlight(Flight f){
+
+        String[] options = {"Economy","Business"};
 
         int choice = JOptionPane.showOptionDialog(
                 this,
-                "Select Booking Type:",
+                "Select Class",
                 "Booking",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
@@ -276,64 +206,55 @@ public class UserDashboard extends JFrame {
                 options[0]
         );
 
-        if (choice == -1) return;
+        if(choice==-1) return;
 
-        String card = JOptionPane.showInputDialog(this, "Enter 8-digit Card Number:");
+        String card = JOptionPane.showInputDialog(this,"Enter 8-digit Card Number:");
 
-        if (card == null || !card.matches("\\d{8}")) {
-            showStyledMessage("Invalid Card Number! Must contain exactly 8 digits.");
+        if(card==null || !card.matches("\\d{8}")){
+            show("Invalid Card Number (8 digits required)");
             return;
         }
 
-        showStyledMessage("Processing Payment...");
-
-        Thread paymentThread = new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-                SwingUtilities.invokeLater(() -> {
-                    showStyledMessage("Payment Successful!");
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        paymentThread.start();
-    }
-
-    private void showMyBookings() {
+        Booking booking = new Booking(
+                loggedInUser.getId(),
+                f.getFlightId(),
+                choice==0?"Economy":"Business"
+        );
 
         BookingDAO dao = new BookingDAO();
-        List<String[]> bookings = dao.getBookingsByUser(loggedInUser.getId());
 
-        if (bookings.isEmpty()) {
-            showStyledMessage("No bookings found.");
-            return;
+        try{
+            if(dao.bookFlight(booking)){
+                show("Booking Successful!");
+                showAllFlights(); // 🔥 REFRESH AFTER BOOKING
+            }else{
+                show("Booking Failed.");
+            }
+        }catch(Exception e){
+            show(e.getMessage());
         }
+    }
 
-        String[] columns = {"Booking ID", "Flight ID", "Source", "Destination", "Class"};
-        String[][] data = new String[bookings.size()][5];
+    private JButton styledButton(String text, Color color){
+        JButton b = new JButton(text);
+        b.setBackground(color);
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setFont(new Font("Segoe UI",Font.BOLD,14));
+        return b;
+    }
 
-        for (int i = 0; i < bookings.size(); i++) {
-            data[i] = bookings.get(i);
-        }
+    private JLabel label(String text){
+        JLabel l = new JLabel(text);
+        l.setForeground(Color.WHITE);
+        l.setFont(new Font("Segoe UI",Font.PLAIN,14));
+        return l;
+    }
 
-        JTable table = new JTable(data, columns);
-        table.setRowHeight(28);
-        table.setBackground(new Color(35, 40, 60));
-        table.setForeground(Color.WHITE);
-        table.setGridColor(new Color(60, 70, 100));
-        table.setSelectionBackground(new Color(0, 150, 255));
-        table.setSelectionForeground(Color.WHITE);
-
-        table.getTableHeader().setBackground(new Color(20, 25, 45));
-        table.getTableHeader().setForeground(Color.WHITE);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        JScrollPane pane = new JScrollPane(table);
-        pane.getViewport().setBackground(new Color(35, 40, 60));
-        pane.setPreferredSize(new Dimension(750, 300));
-
-        showStyledDialog(pane, "My Bookings");
+    private void show(String msg){
+        UIManager.put("Panel.background", new Color(30,35,55));
+        UIManager.put("OptionPane.background", new Color(30,35,55));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+        JOptionPane.showMessageDialog(this,msg);
     }
 }

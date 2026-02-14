@@ -67,7 +67,31 @@ public class UserDashboard extends JFrame {
         main.setBackground(new Color(15, 20, 35));
         main.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        main.add(createSearchPanel(), BorderLayout.NORTH);
+        // Create tabbed pane
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBackground(new Color(15, 20, 35));
+        tabbedPane.setForeground(Color.WHITE);
+        tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // Tab 1: Search Flights
+        JPanel searchTab = createSearchFlightsTab();
+        tabbedPane.addTab("Search Flights", searchTab);
+
+        // Tab 2: My Bookings
+        JPanel bookingsTab = createMyBookingsTab();
+        tabbedPane.addTab("My Bookings", bookingsTab);
+
+        main.add(tabbedPane, BorderLayout.CENTER);
+
+        return main;
+    }
+
+    private JPanel createSearchFlightsTab() {
+
+        JPanel tab = new JPanel(new BorderLayout());
+        tab.setBackground(new Color(15, 20, 35));
+
+        tab.add(createSearchPanel(), BorderLayout.NORTH);
 
         resultPanel = new JPanel();
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
@@ -80,9 +104,44 @@ public class UserDashboard extends JFrame {
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
 
-        main.add(scroll, BorderLayout.CENTER);
+        tab.add(scroll, BorderLayout.CENTER);
 
-        return main;
+        return tab;
+    }
+
+    private JPanel createMyBookingsTab() {
+
+        JPanel tab = new JPanel(new BorderLayout());
+        tab.setBackground(new Color(15, 20, 35));
+
+        // Refresh button at top
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setBackground(new Color(35, 40, 60));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JButton refreshBtn = styledButton("Refresh", new Color(0, 150, 255));
+        topPanel.add(refreshBtn);
+
+        // Bookings panel
+        JPanel bookingsPanel = new JPanel();
+        bookingsPanel.setLayout(new BoxLayout(bookingsPanel, BoxLayout.Y_AXIS));
+        bookingsPanel.setBackground(new Color(15, 20, 35));
+
+        JScrollPane scroll = new JScrollPane(bookingsPanel);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(new Color(15, 20, 35));
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        tab.add(topPanel, BorderLayout.NORTH);
+        tab.add(scroll, BorderLayout.CENTER);
+
+        // Load bookings
+        refreshBtn.addActionListener(e -> loadMyBookings(bookingsPanel));
+        loadMyBookings(bookingsPanel);
+
+        return tab;
     }
 
     private JPanel createSearchPanel() {
@@ -241,8 +300,6 @@ public class UserDashboard extends JFrame {
         infoPanel.add(business);
 
         JButton bookBtn = styledButton("Book Now", new Color(0, 180, 120));
-        bookBtn.setPreferredSize(new Dimension(100, 45));
-        bookBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         bookBtn.addActionListener(e -> bookFlight(f));
 
@@ -351,5 +408,102 @@ public class UserDashboard extends JFrame {
         UIManager.put("OptionPane.background", new Color(30, 35, 55));
         UIManager.put("OptionPane.messageForeground", Color.WHITE);
         JOptionPane.showMessageDialog(this, msg);
+    }
+
+    private void loadMyBookings(JPanel bookingsPanel) {
+        bookingsPanel.removeAll();
+
+        BookingDAO bookingDAO = new BookingDAO();
+        List<String[]> bookings = bookingDAO.getBookingsByUser(loggedInUser.getId());
+
+        if (bookings.isEmpty()) {
+            JLabel noBookings = new JLabel("No bookings found.");
+            noBookings.setForeground(new Color(150, 150, 150));
+            noBookings.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+            noBookings.setAlignmentX(Component.CENTER_ALIGNMENT);
+            bookingsPanel.add(Box.createVerticalStrut(50));
+            bookingsPanel.add(noBookings);
+        } else {
+            for (String[] booking : bookings) {
+                bookingsPanel.add(createBookingCard(booking));
+                bookingsPanel.add(Box.createVerticalStrut(15));
+            }
+        }
+
+        bookingsPanel.revalidate();
+        bookingsPanel.repaint();
+    }
+
+    private JPanel createBookingCard(String[] booking) {
+        // booking: [booking_id, flight_id, source, destination, class_type]
+
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(new Color(45, 55, 90));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(70, 80, 120), 1),
+                BorderFactory.createEmptyBorder(25, 30, 25, 30)));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
+        card.setPreferredSize(new Dimension(1000, 140));
+
+        // Info panel
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBackground(new Color(45, 55, 90));
+
+        JLabel bookingId = new JLabel("Booking #" + booking[0]);
+        bookingId.setForeground(new Color(100, 200, 255));
+        bookingId.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        bookingId.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel route = new JLabel(booking[2] + " → " + booking[3]);
+        route.setForeground(Color.WHITE);
+        route.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        route.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel flightId = new JLabel("Flight: " + booking[1]);
+        flightId.setForeground(new Color(200, 200, 220));
+        flightId.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        flightId.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel classType = new JLabel("Class: " + booking[4]);
+        classType.setForeground(booking[4].equalsIgnoreCase("Economy")
+                ? new Color(150, 255, 150)
+                : new Color(255, 215, 100));
+        classType.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        classType.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        infoPanel.add(bookingId);
+        infoPanel.add(Box.createVerticalStrut(8));
+        infoPanel.add(route);
+        infoPanel.add(Box.createVerticalStrut(10));
+        infoPanel.add(flightId);
+        infoPanel.add(Box.createVerticalStrut(5));
+        infoPanel.add(classType);
+
+        // Cancel button
+        JButton cancelBtn = styledButton("Cancel Booking", new Color(200, 50, 50));
+
+        cancelBtn.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to cancel this booking?",
+                    "Cancel Booking",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                BookingDAO dao = new BookingDAO();
+                if (dao.cancelBooking(Integer.parseInt(booking[0]))) {
+                    show("Booking cancelled successfully!");
+                    loadMyBookings((JPanel) card.getParent());
+                } else {
+                    show("Failed to cancel booking.");
+                }
+            }
+        });
+
+        card.add(infoPanel, BorderLayout.CENTER);
+        card.add(cancelBtn, BorderLayout.EAST);
+
+        return card;
     }
 }

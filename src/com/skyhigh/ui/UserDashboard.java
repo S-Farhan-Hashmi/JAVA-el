@@ -518,8 +518,8 @@ public class UserDashboard extends JFrame {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(70, 80, 120), 1),
                 BorderFactory.createEmptyBorder(25, 30, 25, 30)));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
-        card.setPreferredSize(new Dimension(1000, 140));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 165));
+        card.setPreferredSize(new Dimension(1000, 165));
 
         // Info panel
         JPanel infoPanel = new JPanel();

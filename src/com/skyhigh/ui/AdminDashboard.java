@@ -56,10 +56,10 @@ public class AdminDashboard extends JFrame {
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
         top.setBackground(new Color(18, 22, 35));
 
-        JButton addBtn = styledButton("Add Flight", new Color(0,150,255));
-        JButton deleteBtn = styledButton("Delete Selected", new Color(200,50,50));
-        JButton refreshBtn = styledButton("Refresh", new Color(100,100,200));
-        JButton logoutBtn = styledButton("Logout", new Color(180,40,40));
+        JButton addBtn = styledButton("Add Flight", new Color(0, 150, 255));
+        JButton deleteBtn = styledButton("Delete Selected", new Color(200, 50, 50));
+        JButton refreshBtn = styledButton("Refresh", new Color(100, 100, 200));
+        JButton logoutBtn = styledButton("Logout", new Color(180, 40, 40));
 
         top.add(addBtn);
         top.add(deleteBtn);
@@ -69,35 +69,34 @@ public class AdminDashboard extends JFrame {
         panel.add(top, BorderLayout.NORTH);
 
         model = new DefaultTableModel(
-                new String[]{"ID","Source","Destination",
-                        "Departure","Arrival",
-                        "Eco ₹","Eco Seats",
-                        "Bus ₹","Bus Seats"},0);
+                new String[] { "ID", "Source", "Destination",
+                        "Departure", "Arrival",
+                        "Eco ₹", "Eco Seats",
+                        "Bus ₹", "Bus Seats" },
+                0);
 
         table = new JTable(model);
         table.setRowHeight(32);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setForeground(Color.WHITE);
-        table.setGridColor(new Color(60,70,100));
-        table.setSelectionBackground(new Color(0,140,255));
+        table.setGridColor(new Color(60, 70, 100));
+        table.setSelectionBackground(new Color(0, 140, 255));
         table.setSelectionForeground(Color.WHITE);
 
-        table.getTableHeader().setBackground(new Color(25,30,50));
+        table.getTableHeader().setBackground(new Color(25, 30, 50));
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
 
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table,Object value,
-                                                           boolean isSelected,
-                                                           boolean hasFocus,
-                                                           int row,int column){
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected,
+                    boolean hasFocus,
+                    int row, int column) {
                 Component c = super.getTableCellRendererComponent(
-                        table,value,isSelected,hasFocus,row,column);
-                if(!isSelected){
-                    c.setBackground(row%2==0 ?
-                            new Color(28,35,60) :
-                            new Color(24,30,50));
+                        table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? new Color(28, 35, 60) : new Color(24, 30, 50));
                 }
                 setHorizontalAlignment(SwingConstants.CENTER);
                 return c;
@@ -105,16 +104,16 @@ public class AdminDashboard extends JFrame {
         });
 
         JScrollPane scroll = new JScrollPane(table);
-        scroll.getViewport().setBackground(new Color(18,22,35));
+        scroll.getViewport().setBackground(new Color(18, 22, 35));
         scroll.setBorder(BorderFactory.createEmptyBorder());
 
         panel.add(scroll, BorderLayout.CENTER);
 
-        addBtn.addActionListener(e->addFlight());
-        deleteBtn.addActionListener(e->deleteSelected());
-        refreshBtn.addActionListener(e->loadFlights());
+        addBtn.addActionListener(e -> addFlight());
+        deleteBtn.addActionListener(e -> deleteSelected());
+        refreshBtn.addActionListener(e -> loadFlights());
 
-        logoutBtn.addActionListener(e->{
+        logoutBtn.addActionListener(e -> {
             dispose();
             new LoginFrame();
         });
@@ -124,7 +123,7 @@ public class AdminDashboard extends JFrame {
         return panel;
     }
 
-    private JButton styledButton(String text, Color color){
+    private JButton styledButton(String text, Color color) {
         JButton b = new JButton(text);
         b.setBackground(color);
         b.setForeground(Color.WHITE);
@@ -133,11 +132,11 @@ public class AdminDashboard extends JFrame {
         return b;
     }
 
-    private void loadFlights(){
+    private void loadFlights() {
         model.setRowCount(0);
         List<Flight> flights = flightDAO.getAllFlights();
-        for(Flight f : flights){
-            model.addRow(new Object[]{
+        for (Flight f : flights) {
+            model.addRow(new Object[] {
                     f.getFlightId(),
                     f.getSource(),
                     f.getDestination(),
@@ -151,50 +150,74 @@ public class AdminDashboard extends JFrame {
         }
     }
 
-    private void addFlight(){
+    private void addFlight() {
 
-        JTextField id = new JTextField();
-        JTextField src = new JTextField();
-        JTextField dest = new JTextField();
+        // Styled text fields
+        JTextField id = createStyledTextField();
+        JTextField src = createStyledTextField();
+        JTextField dest = createStyledTextField();
 
-        JTextField depTime = new JTextField("10:00");
-        JComboBox<String> depAMPM =
-                new JComboBox<>(new String[]{"AM","PM"});
+        JTextField depTime = createStyledTextField();
+        depTime.setText("10:00");
+        JComboBox<String> depAMPM = createStyledComboBox(new String[] { "AM", "PM" });
 
-        JTextField arrTime = new JTextField("12:00");
-        JComboBox<String> arrAMPM =
-                new JComboBox<>(new String[]{"AM","PM"});
+        JTextField arrTime = createStyledTextField();
+        arrTime.setText("12:00");
+        JComboBox<String> arrAMPM = createStyledComboBox(new String[] { "AM", "PM" });
 
-        JTextField ecoPrice = new JTextField();
-        JTextField busPrice = new JTextField();
-        JTextField ecoSeats = new JTextField();
-        JTextField busSeats = new JTextField();
+        JTextField ecoPrice = createStyledTextField();
+        JTextField busPrice = createStyledTextField();
+        JTextField ecoSeats = createStyledTextField();
+        JTextField busSeats = createStyledTextField();
 
-        JPanel panel = new JPanel(new GridLayout(0,3,15,15));
-        panel.setBackground(new Color(30,35,55));
+        // Styled panel with dark theme
+        JPanel panel = new JPanel(new GridLayout(0, 3, 15, 15));
+        panel.setBackground(new Color(30, 35, 55));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        panel.add(label("Flight ID:")); panel.add(id); panel.add(new JLabel());
-        panel.add(label("Source:")); panel.add(src); panel.add(new JLabel());
-        panel.add(label("Destination:")); panel.add(dest); panel.add(new JLabel());
+        panel.add(label("Flight ID:"));
+        panel.add(id);
+        panel.add(new JLabel());
+        panel.add(label("Source:"));
+        panel.add(src);
+        panel.add(new JLabel());
+        panel.add(label("Destination:"));
+        panel.add(dest);
+        panel.add(new JLabel());
 
-        panel.add(label("Departure:")); panel.add(depTime); panel.add(depAMPM);
-        panel.add(label("Arrival:")); panel.add(arrTime); panel.add(arrAMPM);
+        panel.add(label("Departure:"));
+        panel.add(depTime);
+        panel.add(depAMPM);
+        panel.add(label("Arrival:"));
+        panel.add(arrTime);
+        panel.add(arrAMPM);
 
-        panel.add(label("Economy Price:")); panel.add(ecoPrice); panel.add(new JLabel());
-        panel.add(label("Business Price:")); panel.add(busPrice); panel.add(new JLabel());
+        panel.add(label("Economy Price:"));
+        panel.add(ecoPrice);
+        panel.add(new JLabel());
+        panel.add(label("Business Price:"));
+        panel.add(busPrice);
+        panel.add(new JLabel());
 
-        panel.add(label("Economy Seats:")); panel.add(ecoSeats); panel.add(new JLabel());
-        panel.add(label("Business Seats:")); panel.add(busSeats); panel.add(new JLabel());
+        panel.add(label("Economy Seats:"));
+        panel.add(ecoSeats);
+        panel.add(new JLabel());
+        panel.add(label("Business Seats:"));
+        panel.add(busSeats);
+        panel.add(new JLabel());
 
-        int result = JOptionPane.showConfirmDialog(this,panel,
-                "Add Flight",JOptionPane.OK_CANCEL_OPTION);
+        // Style the dialog
+        UIManager.put("OptionPane.background", new Color(30, 35, 55));
+        UIManager.put("Panel.background", new Color(30, 35, 55));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
 
-        if(result==JOptionPane.OK_OPTION){
-            try{
-                String departure =
-                        depTime.getText()+" "+depAMPM.getSelectedItem();
-                String arrival =
-                        arrTime.getText()+" "+arrAMPM.getSelectedItem();
+        int result = JOptionPane.showConfirmDialog(this, panel,
+                "Add Flight", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String departure = depTime.getText() + " " + depAMPM.getSelectedItem();
+                String arrival = arrTime.getText() + " " + arrAMPM.getSelectedItem();
 
                 Flight flight = new Flight(
                         id.getText(),
@@ -205,48 +228,67 @@ public class AdminDashboard extends JFrame {
                         Double.parseDouble(ecoPrice.getText()),
                         Double.parseDouble(busPrice.getText()),
                         Integer.parseInt(ecoSeats.getText()),
-                        Integer.parseInt(busSeats.getText())
-                );
+                        Integer.parseInt(busSeats.getText()));
 
-                if(flightDAO.addFlight(flight)){
+                if (flightDAO.addFlight(flight)) {
                     loadFlights();
                     show("Flight Added Successfully!");
-                }else{
+                } else {
                     show("Failed to Add Flight!");
                 }
 
-            }catch(Exception e){
+            } catch (Exception e) {
                 show("Invalid Input!");
             }
         }
     }
 
-    private void deleteSelected(){
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField();
+        field.setBackground(new Color(70, 75, 100));
+        field.setForeground(Color.WHITE);
+        field.setCaretColor(Color.WHITE);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(100, 110, 140), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        return field;
+    }
+
+    private JComboBox<String> createStyledComboBox(String[] items) {
+        JComboBox<String> combo = new JComboBox<>(items);
+        combo.setBackground(new Color(70, 75, 100));
+        combo.setForeground(Color.WHITE);
+        combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        return combo;
+    }
+
+    private void deleteSelected() {
         int row = table.getSelectedRow();
-        if(row==-1){
+        if (row == -1) {
             show("Select a flight first!");
             return;
         }
-        String id = model.getValueAt(row,0).toString();
-        if(flightDAO.deleteFlight(id)){
+        String id = model.getValueAt(row, 0).toString();
+        if (flightDAO.deleteFlight(id)) {
             loadFlights();
             show("Flight Deleted Successfully!");
-        }else{
+        } else {
             show("Delete Failed!");
         }
     }
 
-    private JLabel label(String text){
+    private JLabel label(String text) {
         JLabel l = new JLabel(text);
         l.setForeground(Color.WHITE);
-        l.setFont(new Font("Segoe UI",Font.PLAIN,14));
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         return l;
     }
 
-    private void show(String msg){
-        UIManager.put("Panel.background", new Color(30,35,55));
-        UIManager.put("OptionPane.background", new Color(30,35,55));
+    private void show(String msg) {
+        UIManager.put("Panel.background", new Color(30, 35, 55));
+        UIManager.put("OptionPane.background", new Color(30, 35, 55));
         UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        JOptionPane.showMessageDialog(this,msg);
+        JOptionPane.showMessageDialog(this, msg);
     }
 }

@@ -46,16 +46,26 @@ public class UserDashboard extends JFrame {
         header.setBackground(new Color(10, 15, 28));
         header.setPreferredSize(new Dimension(1000, 75));
 
-        JLabel title = new JLabel("  SkyHigh Airlines");
+        // Add logo
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        leftPanel.setOpaque(false);
+
+        JLabel logoLabel = createLogo();
+        if (logoLabel != null) {
+            leftPanel.add(logoLabel);
+        }
+
+        JLabel title = new JLabel("SkyHigh Airlines");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        leftPanel.add(title);
 
         JLabel welcome = new JLabel("Welcome, " + loggedInUser.getName() + "  ");
         welcome.setForeground(new Color(150, 200, 255));
         welcome.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcome.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        header.add(title, BorderLayout.WEST);
+        header.add(leftPanel, BorderLayout.WEST);
         header.add(welcome, BorderLayout.EAST);
 
         return header;
@@ -581,5 +591,18 @@ public class UserDashboard extends JFrame {
         card.add(cancelBtn, BorderLayout.EAST);
 
         return card;
+    }
+
+    private JLabel createLogo() {
+        try {
+            ImageIcon originalIcon = new ImageIcon("src/skyhigh_logo.png");
+            if (originalIcon.getIconWidth() > 0) {
+                Image scaledImage = originalIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                return new JLabel(new ImageIcon(scaledImage));
+            }
+        } catch (Exception e) {
+            System.out.println("Logo not found. Place 'skyhigh_logo.png' in src folder.");
+        }
+        return null;
     }
 }

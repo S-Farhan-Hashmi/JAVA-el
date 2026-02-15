@@ -38,11 +38,21 @@ public class AdminDashboard extends JFrame {
         header.setBackground(new Color(12, 16, 28));
         header.setPreferredSize(new Dimension(1000, 75));
 
-        JLabel title = new JLabel("  SkyHigh Airlines - Admin Portal");
+        // Add logo
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        leftPanel.setOpaque(false);
+
+        JLabel logoLabel = createLogo();
+        if (logoLabel != null) {
+            leftPanel.add(logoLabel);
+        }
+
+        JLabel title = new JLabel("SkyHigh Airlines - Admin Portal");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        leftPanel.add(title);
 
-        header.add(title, BorderLayout.WEST);
+        header.add(leftPanel, BorderLayout.WEST);
 
         return header;
     }
@@ -290,5 +300,18 @@ public class AdminDashboard extends JFrame {
         UIManager.put("OptionPane.background", new Color(30, 35, 55));
         UIManager.put("OptionPane.messageForeground", Color.WHITE);
         JOptionPane.showMessageDialog(this, msg);
+    }
+
+    private JLabel createLogo() {
+        try {
+            ImageIcon originalIcon = new ImageIcon("src/skyhigh_logo.png");
+            if (originalIcon.getIconWidth() > 0) {
+                Image scaledImage = originalIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                return new JLabel(new ImageIcon(scaledImage));
+            }
+        } catch (Exception e) {
+            System.out.println("Logo not found. Place 'skyhigh_logo.png' in src folder.");
+        }
+        return null;
     }
 }

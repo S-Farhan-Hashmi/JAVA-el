@@ -41,8 +41,7 @@ public class LoginFrame extends JFrame {
         card.setLayout(new GridBagLayout());
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(80, 90, 130), 1, true),
-                BorderFactory.createEmptyBorder(35, 45, 35, 45)
-        ));
+                BorderFactory.createEmptyBorder(35, 45, 35, 45)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 10, 15, 10);
@@ -142,8 +141,17 @@ public class LoginFrame extends JFrame {
 
     private void login() {
 
-        String email = emailField.getText();
-        String password = new String(passwordField.getPassword());
+        String email = emailField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
+
+        // Validate empty fields
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Email and password are required!",
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         User user = authService.login(email, password);
 

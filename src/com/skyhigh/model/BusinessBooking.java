@@ -3,7 +3,7 @@ package com.skyhigh.model;
 public class BusinessBooking extends Booking {
 
     public BusinessBooking(int userId, String flightId) {
-        super(userId, flightId);
+        super(userId, flightId, "Business");
     }
 
     @Override

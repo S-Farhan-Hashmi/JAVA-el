@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.skyhigh.model.Flight;
 
-
 public class BookingDAO {
 
     public boolean bookFlight(Booking booking) throws SeatUnavailableException {
@@ -52,7 +51,7 @@ public class BookingDAO {
             PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
             insertStmt.setInt(1, booking.getUserId());
             insertStmt.setString(2, booking.getFlightId());
-            insertStmt.setString(3, booking.getClass().getSimpleName());
+            insertStmt.setString(3, booking.getClassType());
             insertStmt.executeUpdate();
 
             conn.commit(); // Commit transaction
@@ -67,6 +66,7 @@ public class BookingDAO {
             return false;
         }
     }
+
     public boolean cancelBooking(int bookingId) {
 
         String getFlightQuery = "SELECT flight_id FROM bookings WHERE booking_id = ?";
@@ -107,25 +107,26 @@ public class BookingDAO {
             return false;
         }
     }
+
     public List<String[]> getBookingsByUser(int userId) {
 
         List<String[]> bookings = new ArrayList<>();
 
         String query = """
-        SELECT b.booking_id, b.flight_id, b.class_type, f.source, f.destination
-        FROM bookings b
-        JOIN flights f ON b.flight_id = f.flight_id
-        WHERE b.user_id = ?
-        """;
+                SELECT b.booking_id, b.flight_id, b.class_type, f.source, f.destination
+                FROM bookings b
+                JOIN flights f ON b.flight_id = f.flight_id
+                WHERE b.user_id = ?
+                """;
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                bookings.add(new String[]{
+                bookings.add(new String[] {
                         rs.getString("booking_id"),
                         rs.getString("flight_id"),
                         rs.getString("source"),
@@ -140,6 +141,5 @@ public class BookingDAO {
 
         return bookings;
     }
-
 
 }

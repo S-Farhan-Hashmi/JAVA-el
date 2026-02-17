@@ -150,9 +150,17 @@ public class RegisterFrame extends JFrame {
         String password = new String(passwordField.getPassword());
         String phone = phoneField.getText();
 
-        if (authService.register(name, email, password, phone)) {
+        String result = authService.register(name, email, password, phone);
+
+        if (result.equals("SUCCESS")) {
             JOptionPane.showMessageDialog(this, "Registration Successful!");
             dispose();
+        } else if (result.equals("EMPTY_FIELDS")) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields.");
+        } else if (result.equals("INVALID_PHONE")) {
+            JOptionPane.showMessageDialog(this, "Invalid phone number (10-15 digits required).");
+        } else if (result.equals("DUPLICATE_EMAIL")) {
+            JOptionPane.showMessageDialog(this, "Email already registered.");
         } else {
             JOptionPane.showMessageDialog(this, "Registration Failed.");
         }

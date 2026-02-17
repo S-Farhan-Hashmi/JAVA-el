@@ -1,5 +1,6 @@
 package com.skyhigh.model;
 
+//encapsulation
 public class User {
 
     private int id;
@@ -29,10 +30,27 @@ public class User {
     }
 
     // Getters
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public String getPhone() { return phone; }
-    public String getRole() { return role; }
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getRole() {
+        return role;
+    }
 }

@@ -22,10 +22,8 @@ public class RegisterFrame extends JFrame {
         setSize(650, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setContentPane(new GradientPanel());
         setLayout(new BorderLayout());
-
-        getContentPane().setBackground(new Color(20, 25, 40));
-
         add(createRegisterPanel(), BorderLayout.CENTER);
 
         setVisible(true);
@@ -33,14 +31,17 @@ public class RegisterFrame extends JFrame {
 
     private JPanel createRegisterPanel() {
 
-        JPanel wrapper = new JPanel(new GridBagLayout());
-        wrapper.setBackground(new Color(20, 25, 40));
+        JPanel panel1 = new JPanel(new GridBagLayout());
+        panel1.setOpaque(false);
 
         JPanel card = new JPanel();
         card.setPreferredSize(new Dimension(450, 400));
         card.setBackground(new Color(45, 50, 70));
         card.setLayout(new GridBagLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(80, 90, 130), 1, true),
+                BorderFactory.createEmptyBorder(35, 45, 35, 45)));
+
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 10, 15, 10);
@@ -125,9 +126,9 @@ public class RegisterFrame extends JFrame {
 
         registerBtn.addActionListener(e -> registerUser());
 
-        wrapper.add(card);
+        panel1.add(card);
 
-        return wrapper;
+        return panel1;
     }
 
     private void styleInput(JTextField field) {

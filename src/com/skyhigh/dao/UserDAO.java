@@ -3,29 +3,22 @@ package com.skyhigh.dao;
 import com.skyhigh.db.DBConnection;
 import com.skyhigh.model.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-
+import java.sql.*;
 public class UserDAO {
 
-    // Register new user
-    // Returns: 1 for success, 0 for general error, -1 for duplicate email
     public int registerUser(User user) {
 
         String query = "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        try{
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query);
 
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPassword());
             stmt.setString(4, user.getPhone());
             stmt.setString(5, user.getRole());
-
             int rows = stmt.executeUpdate();
             return rows > 0 ? 1 : 0;
 

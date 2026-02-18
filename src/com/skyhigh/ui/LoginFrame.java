@@ -32,8 +32,8 @@ public class LoginFrame extends JFrame {
 
     private JPanel createLoginPanel() {
 
-        JPanel wrapper = new JPanel(new GridBagLayout());
-        wrapper.setOpaque(false); // allow gradient to show
+        JPanel panel1 = new JPanel(new GridBagLayout());
+        panel1.setOpaque(false); // allow gradient to show
 
         JPanel card = new JPanel();
         card.setPreferredSize(new Dimension(420, 380));
@@ -113,11 +113,18 @@ public class LoginFrame extends JFrame {
         card.add(registerButton, gbc);
 
         loginButton.addActionListener(e -> login());
+//        loginButton.addActionListener(new ActionListener() {
+//    @Override
+//    public void actionPerformed(ActionEvent e) {
+//        login();
+//    }
+//        Annoyomous inner class
+//});
         registerButton.addActionListener(e -> new RegisterFrame());
 
-        wrapper.add(card);
+        panel1.add(card);
 
-        return wrapper;
+        return panel1;
     }
 
     private void styleInput(JTextField field) {

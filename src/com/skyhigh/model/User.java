@@ -1,6 +1,5 @@
 package com.skyhigh.model;
 
-//encapsulation
 public class User {
 
     private int id;

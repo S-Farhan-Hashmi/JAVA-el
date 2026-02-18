@@ -6,7 +6,7 @@ import com.skyhigh.model.User;
 public class AuthService {
 
     private UserDAO userDAO;
-
+//to prevent dependency injection
     public AuthService() {
         userDAO = new UserDAO();
     }
@@ -28,18 +28,15 @@ public class AuthService {
             return "EMPTY_FIELDS";
         }
 
-        // Validate phone number (must be 10-15 digits only)
-        String phoneDigits = phone.replaceAll("[^0-9]", ""); // Remove non-digits
+        String phoneDigits = phone.replaceAll("\\D", "");
         if (phoneDigits.length() < 10 || phoneDigits.length() > 15) {
             return "INVALID_PHONE";
         }
 
-        // By default, new users are USER role
         User user = new User(name, email, password, phone, "USER");
 
         int result = userDAO.registerUser(user);
 
-        // result: 1=success, 0=db error, -1=duplicate email
         if (result == 1) {
             return "SUCCESS";
         } else if (result == -1) {

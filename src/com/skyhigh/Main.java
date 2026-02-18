@@ -13,7 +13,7 @@ public class Main {
             UIManager.put("TextField.font", new Font("Segoe UI", Font.PLAIN, 14));
             UIManager.put("PasswordField.font", new Font("Segoe UI", Font.PLAIN, 14));
 
-        } catch (Exception ignored) {}
+        } catch (Exception e) {}
 
         new LoginFrame();
     }

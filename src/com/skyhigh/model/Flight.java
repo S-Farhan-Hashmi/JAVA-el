@@ -12,7 +12,6 @@ public class Flight {
     private int economySeats;
     private int businessSeats;
 
-    // Constructor with economy and business pricing (used by UserDashboard)
     public Flight(String flightId, String source, String destination,
             String departureTime, String arrivalTime,
             double economyPrice, double businessPrice,
@@ -28,7 +27,6 @@ public class Flight {
         this.businessSeats = businessSeats;
     }
 
-    // Legacy constructor for backward compatibility (single price)
     public Flight(String flightId, String source, String destination,
             String departureTime, String arrivalTime,
             double price, int seatsAvailable) {

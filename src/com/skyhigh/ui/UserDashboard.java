@@ -450,6 +450,17 @@ public class UserDashboard extends JFrame {
             show("Invalid Card Number (8 digits required)");
             return;
         }
+        else{
+            show("Payment in process");
+            try {
+                Thread.sleep(2000);
+            }
+            catch(InterruptedException e){
+                String s =e.getMessage();
+                show(s);
+            }
+            show("Payment in completed");
+        }
 
         // Create the appropriate Booking subclass
         Booking booking;

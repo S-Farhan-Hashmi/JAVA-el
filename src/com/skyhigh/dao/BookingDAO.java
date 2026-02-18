@@ -4,12 +4,8 @@ import com.skyhigh.db.DBConnection;
 import com.skyhigh.exception.SeatUnavailableException;
 import com.skyhigh.model.Booking;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.sql.*;
 import com.skyhigh.model.Flight;
 
 public class BookingDAO {
@@ -141,5 +137,4 @@ public class BookingDAO {
 
         return bookings;
     }
-
 }
